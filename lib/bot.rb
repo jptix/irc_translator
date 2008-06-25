@@ -1,6 +1,6 @@
 $KCODE = 'UTF8'
 require "rubygems"
-require "translate"
+require File.dirname(__FILE__) + "/translate"
 require 'rbot/rfc2812'
 require 'rbot/ircsocket'
 require 'rbot/timer'
