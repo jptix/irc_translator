@@ -81,7 +81,7 @@ class TranslatorBot
       else
         say "#{nick} --> " + @translator.trans(msg, @from_lang, @to_lang).to_s
       end
-    when /:jp_tix!markus@rykroken.org PRIVMSG #{DESTINATION_CHANNEL} :set (.+?) (.*)/
+    when /:jp_tix!markus@\S+? PRIVMSG #{DESTINATION_CHANNEL} :set (.+?) (.*)/
       @from_lang, @to_lang = $1.to_sym, $2.to_sym
       puts "changing language to #{@from_lang} -> #{@to_lang}"
     end
