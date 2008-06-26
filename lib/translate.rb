@@ -47,6 +47,7 @@ class Translate
       doc = Hpricot(open(url))
       res = doc.search("//div#result_box").inner_text
       puts "result: #{res}"
+      res
     rescue Exception => e
       "Error: #{e.message}"
     end
