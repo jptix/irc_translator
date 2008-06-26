@@ -30,7 +30,7 @@ class Translate
     :portuguese          => 'pt',
     :russian             => 'ru',
     :spanish             => 'es',
-    :swedish             => 'se',
+    :swedish             => 'sv',
   }
   
   UTF8_REGEXP = / \A (?: [\x00-\x7F] | [\xC2-\xDF] [\x80-\xBF] | [\xE1-\xEF] [\x80-\xBF]{2} |                                                                                           
