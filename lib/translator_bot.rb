@@ -18,15 +18,11 @@ class TranslatorBot
     @socket = Irc::IrcSocket.new(@config[:host], @config[:port] || 6667, false)
     @client = Irc::IrcClient.new
     @nick = @config[:nick] || 'translator'
-    @client[:welcome] = proc do |data|
-      @socket.queue "JOIN #{@config[:source_channel]}"
-      @socket.emergency_puts "JOIN #{@config[:destination_channel]}"
-    end
-    @threads = []
     @translator = Translate.new
     
     @from_lang = @config[:from_lang] || :norwegian
     @to_lang = @config[:to_lang] || :english
+    setup_hooks
   end
   
   def connect
@@ -38,8 +34,8 @@ class TranslatorBot
       while @socket.connected?
         if @socket.select
           break unless reply = @socket.gets
-          parse(reply)
           @client.process reply
+          parse(reply)
         end
       end
     end
@@ -69,21 +65,20 @@ class TranslatorBot
       nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
       reply = "#{nick} --> #{reply}"
       act ? action(reply) : say(reply)
-    when /:#{@config[:admin_nick] || 'jp_tix'}!\S+? PRIVMSG #{@config[:destination_channel]} :set (.+?) (.*)/
+    when /:#{@config[:admin_nick] || 'jp_tix'}!\S+? PRIVMSG #{@config[:destination_channel]} :\set (.+?) (.*)/
       @from_lang, @to_lang = $1.to_sym, $2.to_sym
       say "changing language: #{@from_lang} -> #{@to_lang}"
     end
   end
-end
-
-if __FILE__ == $0
-  $stdout.sync = true
-  config = {
-    :host                => "irc.freenode.net",
-    :nick                => 'tolk',
-    :source_channel      => "#ubuntu",
-    :destination_channel => "#jp_tix",
-    :admin_nick          => "jp_tix",
-  }
-  TranslatorBot.new(config).connect
+  
+  def setup_hooks
+    @client[:welcome] = proc do |data|
+      @socket.queue "JOIN #{@config[:source_channel]}"
+      @socket.queue "JOIN #{@config[:destination_channel]}"
+    end
+    
+    @client[:ping] = proc do |data|
+      @socket.queue "PONG #{data[:pingid]}"
+    end
+  end
 end

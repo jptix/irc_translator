@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require File.dirname(__FILE__) + "/../lib/translator_bot.rb"
+
+$stdout.sync = true
+config = eval(File.read(ARGV[0] || File.dirname(__FILE__) + "/../config.rb"))
+TranslatorBot.new(config).connect
