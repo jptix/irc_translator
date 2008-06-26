@@ -1,4 +1,4 @@
-$KCODE = 'UTF8'
+$KCODE = 'u'
 require "rubygems"
 require File.dirname(__FILE__) + "/translate"
 require 'rbot/rfc2812'
@@ -29,7 +29,7 @@ class TranslatorBot
     @socket.connect
     @socket.emergency_puts "NICK #{@nick}\nUSER #{@nick} 4 #{@config[:from] || 'jp.tix'} :google_translator by jp_tix"
     @socket.emergency_puts "JOIN #{@config[:source_channel]}"
-    @socket.emergency_puts "JOIN #{@config[:destination_channel]}"
+    @socket.emergency_puts "JOIN #{@config[:target_channel]}"
     loop do
       while @socket.connected?
         if @socket.select
@@ -46,11 +46,11 @@ class TranslatorBot
   end
 
   def say(message)
-    msg("PRIVMSG", @config[:destination_channel], message)
+    msg("PRIVMSG", @config[:target_channel], message)
   end
 
   def action(message)
-    msg("PRIVMSG", @config[:destination_channel], "\001ACTION #{message}\001")
+    msg("PRIVMSG", @config[:target_channel], "\001ACTION #{message}\001")
   end
 
   def quit(message)
@@ -65,16 +65,18 @@ class TranslatorBot
       nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
       reply = "#{nick} --> #{reply}"
       act ? action(reply) : say(reply)
-    when /:#{@config[:admin_nick] || 'jp_tix'}\S+? PRIVMSG #{@config[:destination_channel]} :\.set (.+?) (.*)/
+    when /:#{@config[:admin_nick] || 'jp_tix'}\S+? PRIVMSG #{@config[:target_channel]} :\.set (.+?) (.*)/
       @from_lang, @to_lang = $1.to_sym, $2.to_sym
       say "changing language: #{@from_lang} -> #{@to_lang}"
     end
   end
   
+  private
+  
   def setup_hooks
     @client[:welcome] = proc do |data|
       @socket.queue "JOIN #{@config[:source_channel]}"
-      @socket.queue "JOIN #{@config[:destination_channel]}"
+      @socket.queue "JOIN #{@config[:target_channel]}"
     end
     
     @client[:ping] = proc do |data|
