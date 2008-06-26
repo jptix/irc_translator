@@ -9,7 +9,7 @@ class Translate
     :arabic              => 'ar',
     :bulgarian           => 'bu',
     :croatian            => 'hr',
-    :czechian            => 'cs',
+    :czech               => 'cs',
     :danish              => 'da',
     :finnish             => 'fi',
     :chinese             => 'zh',
@@ -51,7 +51,7 @@ class Translate
     begin
       pair = "#{LANGS[from]}|#{LANGS[to]}" 
       text = utf?(text) ? text : @conv.iconv(text)
-      url = URI.escape "http://translate.google.com/translate_t?langpair=#{pair}&text=#{text}&ie=UTF8"
+      url = URI.escape "http://translate.google.com/translate_t?langpair=#{pair}&text=#{text}&ie=UTF8&oe=UTF8"
       puts "get   : #{url}"
       doc = Hpricot(open(url))
       res = doc.search("//div#result_box").inner_text
@@ -71,5 +71,5 @@ class Translate
 end
 
 if __FILE__ == $0
-  p Translate.new.trans("gjør de?", :norwegian, :chinese)
+  p Translate.new.trans("Dagbladet.no fikk flere henvendelser fra bekymrede Oslo-boere som mistet strømmen og tv-forbindelsen, og lurte på hva de voldsomme smellene hadde vært.", :norwegian, :polish)
 end
