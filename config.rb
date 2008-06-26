@@ -1,7 +1,7 @@
 {
-  :host                => 'irc.efnet.pl',
-  :nick                => 'tolk2222',
-  :source_channel      => '#jp_tix',
+  :host                => 'irc.efnet.no',
+  :nick                => 'tolk',
+  :source_channel      => '#mac1',
   :target_channel      => '#mac2',
   :admin_nick          => 'jp_tix',
 }
