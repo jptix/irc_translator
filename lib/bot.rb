@@ -7,47 +7,39 @@ require 'rbot/timer'
 require "rbot/config"
 require 'rbot/message'
 
-HOST = "irc.efnet.no"
-NICK = 'tolk'
-FROM = 'jp.tix'
-SOURCE_CHANNEL = "#mac1"
-DESTINATION_CHANNEL = "#mac2"
-
 def debug(message=nil)
   print "DEBUG: #{message}\n" if message
 end
 
-
 class TranslatorBot
-  attr_reader :nick, :socket, :client, :threads
   
-  def initialize(nick)
-    @socket = Irc::IrcSocket.new(HOST, 6667, false)
+  def initialize(config = {})
+    @config = config
+    @socket = Irc::IrcSocket.new(@config[:host], @config[:port] || 6667, false)
     @client = Irc::IrcClient.new
-    @nick = nick
+    @nick = @config[:nick] || 'translator'
     @client[:welcome] = proc do |data|
-      @socket.queue "JOIN #{SOURCE_CHANNEL}"
+      @socket.queue "JOIN #{@config[:source_channel]}"
+      @socket.emergency_puts "JOIN #{@config[:destination_channel]}"
     end
     @threads = []
     @translator = Translate.new
     
-    @from_lang = :norwegian
-    @to_lang = :english
+    @from_lang = @config[:from_lang] || :norwegian
+    @to_lang = @config[:to_lang] || :english
   end
   
   def connect
     @socket.connect
-    @socket.emergency_puts "NICK #{@nick}\nUSER #{@nick} 4 #{FROM} :google_translator by jp_tix"
-    @socket.emergency_puts "JOIN #{SOURCE_CHANNEL}"
-    @socket.emergency_puts "JOIN #{DESTINATION_CHANNEL}"
-    @threads << Thread.start(self) do |bot|
-      loop do
-        while bot.socket.connected?
-          if bot.socket.select
-            break unless reply = bot.socket.gets
-            bot.parse(reply)
-            bot.client.process reply
-          end
+    @socket.emergency_puts "NICK #{@nick}\nUSER #{@nick} 4 #{@config[:from] || 'jp.tix'} :google_translator by jp_tix"
+    @socket.emergency_puts "JOIN #{@config[:source_channel]}"
+    @socket.emergency_puts "JOIN #{@config[:destination_channel]}"
+    loop do
+      while @socket.connected?
+        if @socket.select
+          break unless reply = @socket.gets
+          parse(reply)
+          @client.process reply
         end
       end
     end
@@ -56,16 +48,15 @@ class TranslatorBot
   def msg(type, where, message)
     @socket.queue("#{type} #{where} :#{message}")
   end
+
   def say(message)
-    msg("PRIVMSG", DESTINATION_CHANNEL, message)
+    msg("PRIVMSG", @config[:destination_channel], message)
   end
+
   def action(message)
-    msg("PRIVMSG", DESTINATION_CHANNEL, "\001ACTION #{message}\001")
+    msg("PRIVMSG", @config[:destination_channel], "\001ACTION #{message}\001")
   end
-  def renick(name)
-    @nick = name
-    @socket.queue("NICK #{@nick}")
-  end
+
   def quit(message)
     @socket.emergency_puts "QUIT :#{message}"
     @socket.flush
@@ -74,23 +65,25 @@ class TranslatorBot
   
   def parse(string)
     case string
-    when /:(.+?)!\S+?@\S+? PRIVMSG #{SOURCE_CHANNEL} :(\001ACTION)?(.*)\001?/
-      nick, act, msg = $1, $2, $3
-      if act
-        action("#{nick} --> " + @translator.trans(msg, @from_lang, @to_lang).to_s)
-      else
-        say "#{nick} --> " + @translator.trans(msg, @from_lang, @to_lang).to_s
-      end
-    when /:jp_tix!markus@\S+? PRIVMSG #{DESTINATION_CHANNEL} :set (.+?) (.*)/
+    when /:(.+?)!\S+?@\S+? PRIVMSG #{@config[:source_channel]} :(\001ACTION)?(.*)\001?/
+      nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
+      reply = "#{nick} --> #{reply}"
+      act ? action(reply) : say(reply)
+    when /:#{@config[:admin_nick] || 'jp_tix'}!\S+? PRIVMSG #{@config[:destination_channel]} :set (.+?) (.*)/
       @from_lang, @to_lang = $1.to_sym, $2.to_sym
-      puts "changing language to #{@from_lang} -> #{@to_lang}"
+      say "changing language: #{@from_lang} -> #{@to_lang}"
     end
   end
 end
 
 if __FILE__ == $0
   $stdout.sync = true
-  bot = TranslatorBot.new('tolk')
-  bot.connect
-  bot.threads.each { |t| t.join }
+  config = {
+    :host                => "irc.freenode.net",
+    :nick                => 'tolk',
+    :source_channel      => "#ubuntu",
+    :destination_channel => "#jp_tix",
+    :admin_nick          => "jp_tix",
+  }
+  TranslatorBot.new(config).connect
 end
