@@ -7,7 +7,7 @@ require 'rbot/timer'
 require "rbot/config"
 require 'rbot/message'
 
-HOST = "irc.efnet.nl"
+HOST = "irc.efnet.no"
 NICK = 'tolk'
 FROM = 'jp.tix'
 SOURCE_CHANNEL = "#mac1"
