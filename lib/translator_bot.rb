@@ -61,11 +61,11 @@ class TranslatorBot
   
   def parse(string)
     case string
-    when /:(.+?)!\S+?@\S+? PRIVMSG #{@config[:source_channel]} :(\001ACTION)?(.*)\001?/
+    when /:(.+?)!\S+? PRIVMSG #{@config[:source_channel]} :(\001ACTION)?(.*)\001?/
       nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
       reply = "#{nick} --> #{reply}"
       act ? action(reply) : say(reply)
-    when /:#{@config[:admin_nick] || 'jp_tix'}!\S+? PRIVMSG #{@config[:destination_channel]} :\set (.+?) (.*)/
+    when /:#{@config[:admin_nick] || 'jp_tix'}\S+? PRIVMSG #{@config[:destination_channel]} :\.set (.+?) (.*)/
       @from_lang, @to_lang = $1.to_sym, $2.to_sym
       say "changing language: #{@from_lang} -> #{@to_lang}"
     end
