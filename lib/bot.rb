@@ -11,7 +11,7 @@ HOST = "irc.efnet.no"
 NICK = 'tolk'
 FROM = 'jp.tix'
 SOURCE_CHANNEL = "#mac1"
-DESTINATION_CHANNEL = "#mac1-oversatt"
+DESTINATION_CHANNEL = "#mac2"
 
 def debug(message=nil)
   print "DEBUG: #{message}\n" if message
