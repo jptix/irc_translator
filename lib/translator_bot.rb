@@ -66,7 +66,15 @@ class TranslatorBot
       reply = "#{nick} --> #{reply}"
       act ? action(reply) : say(reply)
     when /:#{@config[:admin_nick] || 'jp_tix'}\S+? PRIVMSG #{@config[:target_channel]} :\.set (.+?) (.*)/
-      @from_lang, @to_lang = $1.to_sym, $2.to_sym
+      from, to = $1.to_sym, $2.to_sym
+      [from, to].each do |l|
+        unless Translate::LANGS.has_key?(l)
+          say "no such language: #{l}" 
+          return
+        end
+      end
+      
+      @from_lang, @to_lang = from, to
       say "changing language: #{@from_lang} -> #{@to_lang}"
     end
   end
