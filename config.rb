@@ -1,8 +1,8 @@
 {
-  :host                => 'irc.efnet.no',
-  :nick                => 'tolk',
-  :source_channel      => '#mac1',
-  :target_channel      => '#mac2',
+  :host                => 'irc.freenode.net',
+  :nick                => 'translator',
+  :source_channel      => '#ruby-lang',
+  :target_channel      => '#ruby-lang.no',
   :admin_nick          => 'jp_tix',
 }
 

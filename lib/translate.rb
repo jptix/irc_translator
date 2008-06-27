@@ -5,7 +5,6 @@ require "iconv"
 
 class Translate
   LANGS              = {
-    :auto                => 'auto',
     :arabic              => 'ar',
     :bulgarian           => 'bu',
     :croatian            => 'hr',
@@ -31,6 +30,7 @@ class Translate
     :russian             => 'ru',
     :spanish             => 'es',
     :swedish             => 'sv',
+    :auto                => 'auto',
   }
   
   UTF8_REGEXP = / \A (?: [\x00-\x7F] | [\xC2-\xDF] [\x80-\xBF] | [\xE1-\xEF] [\x80-\xBF]{2} |                                                                                           
@@ -48,18 +48,15 @@ class Translate
   end
 
   def trans(text, from, to)
-    begin
-      pair = "#{LANGS[from]}|#{LANGS[to]}" 
-      text = utf?(text) ? text : @conv.iconv(text)
-      url = URI.escape "http://translate.google.com/translate_t?langpair=#{pair}&text=#{text}&ie=UTF8&oe=UTF8"
-      puts "get   : #{url}"
-      doc = Hpricot(open(url))
-      res = doc.search("//div#result_box").inner_text
-      puts "result: #{res}"
-      res
-    rescue Exception => e
-      "Error: #{e.message}"
-    end
+    text = utf?(text) ? text : @conv.iconv(text)
+    pair = "#{LANGS[from]}|#{LANGS[to]}" 
+    url = URI.escape "http://translate.google.com/translate_t?langpair=#{pair}&text=#{text}&ie=UTF8&oe=UTF8"
+    puts "url   : #{url}" if $DEBUG
+    res = Hpricot(open(url), HEADERS).search("//div#result_box").inner_text
+    puts "result: #{res}" if $DEBUG
+    res
+  rescue Exception => e
+    "Error: #{e.message}"
   end
   
   private
