@@ -65,8 +65,8 @@ class TranslatorBot
       nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
       reply = "[#{nick}] #{reply}"
       act ? action(reply) : say(reply)
-    when /:#{@config[:admin_nick] || 'jp_tix'}\S+? PRIVMSG #{@config[:target_channel]} :\.set (.+?) (.*)/
-      from, to = $1.to_sym, $2.to_sym
+    when /:(#{@config[:admin_nick] || 'jp_tix'})\S+? PRIVMSG #{@config[:target_channel]} :\.set (.+?) (.*)/
+      from, to = $2.to_sym, $3.to_sym
      
       [from, to].each do |l|
         unless Translate::LANGS.has_key?(l)
