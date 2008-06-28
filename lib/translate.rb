@@ -51,8 +51,8 @@ class Translate
     pair = "#{LANGS[from]}|#{LANGS[to]}" 
 
     text = utf?(text) ? text : @conv.iconv(text)
-    url = URI.escape("http://translate.google.com/translate_t?langpair=#{pair}&ie=UTF8&oe=UTF8&text=") + URI.escape(text, /[^-_.!~*'()a-zA-Z\d;\/?:@=+$,\[\]]/n)
-    
+    url = URI.escape("http://translate.google.com/translate_t?langpair=#{pair}&ie=UTF-8&oe=UTF-8&text=") + 
+          URI.escape(text, /[^-_.!~*'()a-zA-Z\d;\/?:@=+$,\[\]]/n)
     puts "url   : #{url}" if $DEBUG
     res = Hpricot(open(url), HEADERS).search("//div#result_box").inner_text
     puts "result: #{res}" if $DEBUG
@@ -71,5 +71,7 @@ end
 
 if __FILE__ == $0
   $DEBUG = true 
-  p Translate.new.trans("foo & bar", :norwegian, :english)
+  translator = Translate.new
+  p translator.trans("foo & bar", :norwegian, :english)
+  p translator.trans("test '‹›øåøæ", :norwegian, :english)
 end

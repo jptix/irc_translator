@@ -7,11 +7,12 @@ IRC echo bot, translating between languages using Google Translate.
 == REQUIREMENTS:
 
 * ruby + rubygems
-* rbot gem
+* rbot 
+* hpricot
 
 == INSTALL/RUN:
 
-  sudo gem install rbot
+  sudo gem install rbot hpricot
   cp config.rb my_config.rb
   vi my_config.rb
   chmod +x bin/bot
