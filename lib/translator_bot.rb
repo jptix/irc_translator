@@ -65,19 +65,31 @@ class TranslatorBot
       nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
       reply = "[#{nick}] #{reply}"
       act ? action(reply) : say(reply)
-    when /:(#{@config[:admin_nick] || 'jp_tix'})\S+? PRIVMSG #{@config[:target_channel]} :\.set (.+?) (.*)/
-      from, to = $2.to_sym, $3.to_sym
-     
+    when /:(#{@config[:admin_nick] || 'jp_tix'})\S+? PRIVMSG #{@config[:target_channel]} :\.(\S+)( .*)?/
+      on_command($2.to_s, $3.to_s)
+    end
+  end
+  
+  def on_command(cmd, params)
+    case cmd
+    when 'set'
+      from, to = *params.match(/(.+?) (.*)/).captures.map { |e| e.strip.to_sym }
       [from, to].each do |l|
         unless Translate::LANGS.has_key?(l)
           say "no such language: #{l}" 
           return
         end
       end
-      
+    
       @from_lang, @to_lang = from, to
       say "changing language: #{@from_lang} -> #{@to_lang}"
+    when 'list'
+      langs = Translate::LANGS.keys.map { |e| e.to_s }.sort.join(', ')
+      say "available languages: #{langs}"
+    else 
+      say "unknown command #{cmd.inspect} (params: #{params.inspect})"
     end
+    
   end
   
   private
