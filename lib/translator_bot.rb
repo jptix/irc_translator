@@ -15,13 +15,15 @@ class TranslatorBot
   
   def initialize(config = {})
     @config = config
+    
     @socket = Irc::IrcSocket.new(@config[:host], @config[:port] || 6667, false)
     @client = Irc::IrcClient.new
     @nick = @config[:nick] || 'translator'
-    @translator = Translate.new
     
+    @translator = Translate.new
     @from_lang = @config[:from_lang] || :norwegian
     @to_lang = @config[:to_lang] || :english
+
     setup_hooks
   end
   
@@ -53,7 +55,7 @@ class TranslatorBot
     msg("PRIVMSG", @config[:target_channel], "\001ACTION #{message}\001")
   end
 
-  def quit(message)
+  def quit(message = 'bye')
     @socket.emergency_puts "QUIT :#{message}"
     @socket.flush
     @socket.shutdown
@@ -73,19 +75,28 @@ class TranslatorBot
   def on_command(cmd, params)
     case cmd
     when 'set'
-      from, to = *params.match(/(.+?) (.*)/).captures.map { |e| e.strip.to_sym }
-      [from, to].each do |l|
-        unless Translate::LANGS.has_key?(l)
-          say "no such language: #{l}" 
-          return
+      unless (m = params.match(/(.+?) (.*)/))
+       say "USAGE: .set <from> <to>"
+       return
+      else
+        from, to = *m.captures.map { |e| e.strip.to_sym }
+        [from, to].each do |l|
+          unless Translate::LANGS.has_key?(l)
+            say "no such language: #{l}" 
+            return
+          end
         end
-      end
     
-      @from_lang, @to_lang = from, to
-      say "changing language: #{@from_lang} -> #{@to_lang}"
+        @from_lang, @to_lang = from, to
+        say "changing language: #{@from_lang} -> #{@to_lang}"
+      end
     when 'list'
       langs = Translate::LANGS.keys.map { |e| e.to_s }.sort.join(', ')
       say "available languages: #{langs}"
+    when 'current'
+      say "#{@from_lang} -> #{@to_lang}"
+    when 'quit'
+      quit
     else 
       say "unknown command #{cmd.inspect} (params: #{params.inspect})"
     end
