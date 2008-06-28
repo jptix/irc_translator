@@ -15,6 +15,7 @@ class TranslatorBot
   
   def initialize(config = {})
     @config = config
+    @commands = {}
     
     @socket = Irc::IrcSocket.new(@config[:host], @config[:port] || 6667, false)
     @client = Irc::IrcClient.new
@@ -25,6 +26,7 @@ class TranslatorBot
     @to_lang = @config[:to_lang] || :english
 
     setup_hooks
+    setup_commands
   end
   
   def connect
@@ -73,8 +75,28 @@ class TranslatorBot
   end
   
   def on_command(cmd, params)
-    case cmd
-    when 'set'
+    if c = @commands[cmd]
+      c.call(params)
+    else
+      say "no such command #{cmd.inspect}"
+    end
+  end
+  
+  private
+  
+  def setup_hooks
+    @client[:welcome] = proc do |data|
+      @socket.queue "JOIN #{@config[:source_channel]}"
+      @socket.queue "JOIN #{@config[:target_channel]}"
+    end
+    
+    @client[:ping] = proc do |data|
+      @socket.queue "PONG #{data[:pingid]}"
+    end
+  end
+  
+  def setup_commands
+    @commands['set'] = proc do |params|
       unless (m = params.match(/(.+?) (.*)/))
        say "USAGE: .set <from> <to>"
        return
@@ -90,29 +112,17 @@ class TranslatorBot
         @from_lang, @to_lang = from, to
         say "changing language: #{@from_lang} -> #{@to_lang}"
       end
-    when 'list'
-      langs = Translate::LANGS.keys.map { |e| e.to_s }.sort.join(', ')
-      say "available languages: #{langs}"
-    when 'current'
-      say "#{@from_lang} -> #{@to_lang}"
-    when 'quit'
-      quit
-    else 
-      say "unknown command #{cmd.inspect} (params: #{params.inspect})"
     end
     
-  end
-  
-  private
-  
-  def setup_hooks
-    @client[:welcome] = proc do |data|
-      @socket.queue "JOIN #{@config[:source_channel]}"
-      @socket.queue "JOIN #{@config[:target_channel]}"
+    @commands['list'] = proc do
+      say "available languages: " + Translate::LANGS.keys.map { |e| e.to_s }.sort.join(', ')
     end
     
-    @client[:ping] = proc do |data|
-      @socket.queue "PONG #{data[:pingid]}"
-    end
+    @commands['current'] = proc { say "#{@from_lang} -> #{@to_lang}" }
+    @commands['quit'] = proc { quit }
+    @commands['commands'] = proc { say "commands: #{@commands.keys.sort.join(', ')}"}
   end
+  
+  
+  
 end
