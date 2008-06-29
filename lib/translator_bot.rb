@@ -19,12 +19,13 @@ class TranslatorBot
     
     @socket = Irc::IrcSocket.new(@config[:host], @config[:port] || 6667, false)
     @client = Irc::IrcClient.new
-    @nick = @config[:nick] || 'translator'
+    @nick   = @config[:nick] || 'translator'
     
     @translator = Translate.new
-    @from_lang = @config[:from_lang] || "norwegian"
-    @to_lang = @config[:to_lang] || "english"
-
+    @from_lang  = @config[:from_lang] || "norwegian"
+    @to_lang    = @config[:to_lang] || "english"
+    @admins     = @config[:admin_nicks] ? Regexp.union(*@config[:admin_nicks]) : /jp_tix/
+    
     setup_hooks
     setup_commands
   end
@@ -56,6 +57,10 @@ class TranslatorBot
   def action(message)
     msg("PRIVMSG", @config[:target_channel], "\001ACTION #{message}\001")
   end
+  
+  def op(nick)
+    @socket.queue("MODE #{@config[:target_channel]} +o #{nick}")
+  end
 
   def quit(message = 'bye')
     @socket.emergency_puts "QUIT :#{message}"
@@ -65,13 +70,21 @@ class TranslatorBot
   
   def parse(string)
     case string
+    # source channel message 
     when /:(.+?)!\S+? PRIVMSG #{@config[:source_channel]} :(\001ACTION)?(.*)\001?/
       nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
+
+      # hack
       nick = nick[0..(nick.size/2)] if @config[:no_highlight]
+
       reply = "[#{nick}] #{reply}"
       act ? action(reply) : say(reply)
-    when /:(#{@config[:admin_nick] || 'jp_tix'})\S+? PRIVMSG #{@config[:target_channel]} :\.(\S+)( .*)?/
+    # target channel message
+    when /:(#{@admins})\S+? PRIVMSG #{@config[:target_channel]} :\.(\S+)( .*)?/
       on_command($2.to_s, $3.to_s)
+    # target channel joins
+    when /:(.+?)!\S+? JOIN :#{@config[:target_channel]}/
+      on_join($1)
     end
   end
   
@@ -81,6 +94,10 @@ class TranslatorBot
     else
       say "no such command #{cmd.inspect}"
     end
+  end
+  
+  def on_join(nick)
+    op(nick) if @admins =~ nick
   end
   
   private
@@ -119,7 +136,5 @@ class TranslatorBot
     @commands['quit'] = proc { quit }
     @commands['commands'] = proc { say "commands: #{@commands.keys.sort.join(', ')}"}
   end
-  
-  
   
 end
