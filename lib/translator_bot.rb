@@ -103,15 +103,12 @@ class TranslatorBot
        return
       else
         from, to = params.split
-        [from, to].each do |l|
-          unless Translate::LANGS.has_key?(l)
-            say "no such language: #{l}" 
-            return
-          end
+        if [from, to].all? { |lang| Translate::LANGS.has_key?(lang) }
+          @from_lang, @to_lang = from, to
+          say "changing language: #{@from_lang} -> #{@to_lang}"
+        else
+          say "no such language: #{l}" 
         end
-    
-        @from_lang, @to_lang = from, to
-        say "changing language: #{@from_lang} -> #{@to_lang}"
       end
     end
     
