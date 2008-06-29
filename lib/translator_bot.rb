@@ -98,9 +98,8 @@ class TranslatorBot
   
   def setup_commands
     @commands['set'] = proc do |params|
-      unless (params.strip.empty?)
+      if (params.strip.empty?)
        say "USAGE: .set <from> <to>"
-       return
       else
         from, to = params.split
         if [from, to].all? { |lang| Translate::LANGS.has_key?(lang) }
