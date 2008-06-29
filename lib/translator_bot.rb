@@ -106,7 +106,7 @@ class TranslatorBot
           @from_lang, @to_lang = from, to
           say "changing language: #{@from_lang} -> #{@to_lang}"
         else
-          say "no such language: #{l}" 
+          say "invalid pair: #{from} -> #{to}" 
         end
       end
     end
