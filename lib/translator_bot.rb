@@ -67,6 +67,7 @@ class TranslatorBot
     case string
     when /:(.+?)!\S+? PRIVMSG #{@config[:source_channel]} :(\001ACTION)?(.*)\001?/
       nick, act, reply = $1, $2, @translator.trans($3, @from_lang, @to_lang).to_s
+      nick = nick[0..(nick.size/2)] if @config[:no_highlight]
       reply = "[#{nick}] #{reply}"
       act ? action(reply) : say(reply)
     when /:(#{@config[:admin_nick] || 'jp_tix'})\S+? PRIVMSG #{@config[:target_channel]} :\.(\S+)( .*)?/

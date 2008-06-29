@@ -4,4 +4,5 @@ require File.dirname(__FILE__) + "/../lib/translator_bot.rb"
 
 $stdout.sync = true
 config = eval(File.read(ARGV[0] || File.dirname(__FILE__) + "/../config.rb"))
+config[:no_highlight] = true if ARGV.include?("--no-highlight")
 TranslatorBot.new(config).connect
