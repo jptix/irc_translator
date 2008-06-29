@@ -22,8 +22,8 @@ class TranslatorBot
     @nick = @config[:nick] || 'translator'
     
     @translator = Translate.new
-    @from_lang = @config[:from_lang] || :norwegian
-    @to_lang = @config[:to_lang] || :english
+    @from_lang = @config[:from_lang] || "norwegian"
+    @to_lang = @config[:to_lang] || "english"
 
     setup_hooks
     setup_commands
@@ -98,11 +98,11 @@ class TranslatorBot
   
   def setup_commands
     @commands['set'] = proc do |params|
-      unless (m = params.match(/(.+?) (.*)/))
+      unless (params.strip.empty?)
        say "USAGE: .set <from> <to>"
        return
       else
-        from, to = *m.captures.map { |e| e.strip.to_sym }
+        from, to = params.split
         [from, to].each do |l|
           unless Translate::LANGS.has_key?(l)
             say "no such language: #{l}" 
@@ -116,7 +116,7 @@ class TranslatorBot
     end
     
     @commands['list'] = proc do
-      say "available languages: " + Translate::LANGS.keys.map { |e| e.to_s }.sort.join(', ')
+      say "available languages: " + Translate::LANGS.keys.sort.join(', ')
     end
     
     @commands['current'] = proc { say "#{@from_lang} -> #{@to_lang}" }

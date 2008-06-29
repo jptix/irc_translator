@@ -5,32 +5,32 @@ require "iconv"
 
 class Translate
   LANGS              = {
-    :arabic              => 'ar',
-    :bulgarian           => 'bu',
-    :croatian            => 'hr',
-    :czech               => 'cs',
-    :danish              => 'da',
-    :finnish             => 'fi',
-    :chinese             => 'zh',
-    :chinese_simplified  => 'zh-CN',
-    :chinese_traditional => 'zh-TW',
-    :dutch               => 'nl',
-    :english             => 'en',
-    :french              => 'fr',
-    :german              => 'de',
-    :greek               => 'el',
-    :hindi               => 'hi',
-    :italian             => 'it',
-    :japanese            => 'ja',
-    :korean              => 'ko',
-    :norwegian           => 'no',
-    :polish              => 'pl',
-    :romanian            => 'ro',
-    :portuguese          => 'pt',
-    :russian             => 'ru',
-    :spanish             => 'es',
-    :swedish             => 'sv',
-    :auto                => 'auto',
+    "arabic"              => 'ar',
+    "bulgarian"           => 'bu',
+    "croatian"            => 'hr',
+    "czech"               => 'cs',
+    "danish"              => 'da',
+    "finnish"             => 'fi',
+    "chinese"             => 'zh',
+    "chinese_simplified"  => 'zh-CN',
+    "chinese_traditional" => 'zh-TW',
+    "dutch"               => 'nl',
+    "english"             => 'en',
+    "french"              => 'fr',
+    "german"              => 'de',
+    "greek"               => 'el',
+    "hindi"               => 'hi',
+    "italian"             => 'it',
+    "japanese"            => 'ja',
+    "korean"              => 'ko',
+    "norwegian"           => 'no',
+    "polish"              => 'pl',
+    "romanian"            => 'ro',
+    "portuguese"          => 'pt',
+    "russian"             => 'ru',
+    "spanish"             => 'es',
+    "swedish"             => 'sv',
+    "auto"                => 'auto',
   }
   
   UTF8_REGEXP = / \A (?: [\x00-\x7F] | [\xC2-\xDF] [\x80-\xBF] | [\xE1-\xEF] [\x80-\xBF]{2} |                                                                                           
@@ -72,6 +72,6 @@ end
 if __FILE__ == $0
   $DEBUG = true 
   translator = Translate.new
-  p translator.trans("foo & bar", :norwegian, :english)
-  p translator.trans("test '‹›øåøæ", :norwegian, :english)
+  p translator.trans("foo & bar", "norwegian", "english")
+  p translator.trans("test '‹›øåøæ", "norwegian", "english")
 end
