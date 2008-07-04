@@ -6,7 +6,7 @@ require "iconv"
 class Translate
   LANGS              = {
     "arabic"              => 'ar',
-    "bulgarian"           => 'bu',
+    "bulgarian"           => 'bg',
     "croatian"            => 'hr',
     "czech"               => 'cs',
     "danish"              => 'da',

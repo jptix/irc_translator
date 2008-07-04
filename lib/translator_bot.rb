@@ -32,7 +32,7 @@ class TranslatorBot
   
   def connect
     @socket.connect
-    @socket.emergency_puts "NICK #{@nick}\nUSER #{@nick} 4 #{@config[:from] || 'jp.tix'} :google_translator by jp_tix"
+    @socket.emergency_puts "NICK #{@nick}\nUSER #{@nick} 4 #{@config[:from] || 'jp.tix'} :google translate bot by jp_tix"
     @socket.emergency_puts "JOIN #{@config[:source_channel]}"
     @socket.emergency_puts "JOIN #{@config[:target_channel]}"
     loop do
