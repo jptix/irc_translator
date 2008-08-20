@@ -3,6 +3,7 @@
 == DESCRIPTION:
 
 IRC echo bot, translating between languages using Google Translate.
+NB. If you keep this running for too long, Google WILL block you. :)
 
 == REQUIREMENTS:
 
